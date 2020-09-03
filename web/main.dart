@@ -27,7 +27,7 @@ const _intMirror =
     ClassMirror(name: 'int', reflectedType: int, declarations: {});
 const _stringMirror =
     ClassMirror(name: 'String', reflectedType: String, declarations: {});
-const _userMirror =
+const userMirror =
     ClassMirror(name: 'User', reflectedType: User, declarations: {
   'name': GetterMirror(
     invoke: getName,
@@ -83,7 +83,7 @@ const loginMirror =
     name: 'user',
     isStatic: false,
     isTopLevel: false,
-    returnType: _userMirror,
+    returnType: userMirror,
   ),
   'user=': SetterMirror(
     invoke: setUser,
@@ -92,7 +92,7 @@ const loginMirror =
     isTopLevel: false,
     parameters: [
       ParameterMirror(
-          name: '', type: _userMirror, isNamed: false, isOptional: false),
+          name: '', type: userMirror, isNamed: false, isOptional: false),
     ],
   ),
   'password': GetterMirror(
@@ -117,7 +117,7 @@ const loginMirror =
     invoke: createLogin,
     parameters: [
       ParameterMirror(
-          name: 'user', type: _userMirror, isNamed: false, isOptional: false),
+          name: 'user', type: userMirror, isNamed: false, isOptional: false),
       ParameterMirror(
           name: 'password',
           type: _stringMirror,
@@ -158,9 +158,20 @@ const fooMirror =
   ),
 });
 
+var mirrors = {
+  Login: loginMirror,
+  Foo: fooMirror,
+  User: userMirror,
+};
+
 main() {
-  print(jsonDecode<Login>({
-    'user': {'name': 'Joe', 'age': 1, 'id': '1234'},
-    'password': '@dm1n'
-  }, loginMirror));
+  print(jsonDecode<Login>(
+    {
+      'user': {'name': 'Joe', 'age': 1, 'id': '1234'},
+      'password': '@dm1n'
+    },
+    // Comment out this to get the bad behavior.
+    // mirrors[Login] as ClassMirror<Login>)
+    loginMirror,
+  ));
 }
