@@ -16,7 +16,7 @@ main() {
     {
       'user': {'name': 'Joe', 'age': 1, 'id': '1234'},
       'password': '@dm1n',
-      'data': [1],
+      'data': <dynamic>[1],
     },
     // Un-comment this (and comment out next line) to see the bad behavior.
     // mirrors[Login] as ClassMirror<Login>),
