@@ -14,7 +14,12 @@ var mirrors = {
 main() {
   print(jsonDecode(
     {
-      'user': {'name': 'Joe', 'age': 1, 'id': '1234'},
+      'user': {
+        'name': 'Joe',
+        'age': 1,
+        'id': '1234',
+        'extra': 'Foo',
+      },
       'password': '@dm1n',
       'data': <dynamic>[1],
     },
@@ -39,10 +44,10 @@ User getUser(Login login) => login.user;
 void setUser(Login login, User user) => login.user = user;
 String getPassword(Login login) => login.password;
 void setPassword(Login login, String password) => login.password = password;
-List<T> getData<T>(Login<T> login) => login.data;
-void setData<T>(Login<T> login, List<T> data) => login.data = data;
-Login<T> createLogin<T>(List<Object?> positionalArgs, [_]) => Login<T>(
-    positionalArgs[0] as User,
+List<T> getData<T, S>(Login<T, S> login) => login.data;
+void setData<T, S>(Login<T, S> login, List<T> data) => login.data = data;
+Login<T, S> createLogin<T, S>(List<Object?> positionalArgs, [_]) => Login(
+    positionalArgs[0] as User<S>,
     positionalArgs[1] as String,
     positionalArgs[2] as List<T>);
 
@@ -50,9 +55,12 @@ String getName(User user) => user.name;
 void setName(User user, String name) => user.name = name;
 int? getAge(User user) => user.age;
 void setAge(User user, int age) => user.age = age;
-User createUser(List<Object?> positionalArgs,
+T getExtra<T>(User<T> user) => user.extra;
+void setExtra<T>(User<T> user, T extra) => user.extra = extra;
+User<T> createUser<T>(List<Object?> positionalArgs,
         [Map<String, Object?>? namedArgs]) =>
-    User(positionalArgs[0] as String, age: namedArgs!['age'] as int);
+    User<T>(positionalArgs[0] as String,
+        age: namedArgs!['age'] as int, extra: namedArgs['extra'] as T);
 
 int getZap(Foo foo) => foo.zap;
 void setZap(Foo foo, int zap) => foo.zap = zap;
@@ -73,8 +81,8 @@ const _stringMirror = ClassMirror<String>(
 );
 const _listIntMirror = ClassMirror<List<int>>(
   name: 'List<int>',
+  reflectedType: List/*<int>*/,
   typeArguments: [_intMirror],
-  reflectedType: List,
   declarations: {
     '': ConstructorMirror<List<int>>(
       name: '',
@@ -84,9 +92,10 @@ const _listIntMirror = ClassMirror<List<int>>(
     )
   },
 );
-const userMirror = ClassMirror(
+const userMirror = ClassMirror<User<String>>(
   name: 'User',
-  reflectedType: User,
+  reflectedType: User /*String>*/,
+  typeArguments: [_stringMirror],
   declarations: {
     'name': GetterMirror(
       invoke: getName,
@@ -130,7 +139,28 @@ const userMirror = ClassMirror(
         ),
       ],
     ),
-    '': ConstructorMirror<User>(
+    'extra': GetterMirror(
+      invoke: getExtra,
+      name: 'extra',
+      isStatic: false,
+      isTopLevel: false,
+      returnType: _stringMirror,
+    ),
+    'extra=': SetterMirror(
+      invoke: setExtra,
+      name: 'extra=',
+      isStatic: false,
+      isTopLevel: false,
+      parameters: [
+        ParameterMirror(
+          name: '',
+          type: _stringMirror,
+          isNamed: false,
+          isOptional: false,
+        ),
+      ],
+    ),
+    '': ConstructorMirror<User<String>>(
       name: '',
       invoke: createUser,
       parameters: [
@@ -146,15 +176,25 @@ const userMirror = ClassMirror(
           isNamed: true,
           isOptional: true,
         ),
+        ParameterMirror(
+          name: 'extra',
+          type: _stringMirror,
+          isNamed: true,
+          isOptional: true,
+        ),
       ],
       metadata: [fromJson],
     ),
   },
 );
 
-const loginMirror = ClassMirror<Login<int>>(
-    name: 'Login<int>',
-    reflectedType: Login,
+const loginMirror = ClassMirror<Login<int, String>>(
+    name: 'Login<int, String>',
+    reflectedType: Login/*<int, String>*/,
+    typeArguments: [
+      _intMirror,
+      _stringMirror
+    ],
     declarations: {
       'user': GetterMirror(
         invoke: getUser,
@@ -219,7 +259,7 @@ const loginMirror = ClassMirror<Login<int>>(
           ),
         ],
       ),
-      '': ConstructorMirror<Login<int>>(
+      '': ConstructorMirror<Login<int, String>>(
         name: '',
         invoke: createLogin,
         parameters: [
