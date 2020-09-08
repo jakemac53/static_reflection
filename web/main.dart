@@ -24,7 +24,7 @@ main() {
       'data': <dynamic>[1],
     },
     // Un-comment this (and comment out next line) to see the bad behavior.
-    // mirrors[Login] as ClassMirror<Login>),
+    // mirrors[Login] as ClassMirror<Login<int, String>>,
     loginMirror,
   ));
 }
@@ -37,8 +37,8 @@ void makeFoo() {
 
 // Below here would all be code generated based on something like:
 //
-// external ClassMirror<Login> loginMirror;
-// external ClassMirror<Login> fooMirror;
+// external ClassMirror<Login<int, String>> loginMirror;
+// external ClassMirror<Foo> fooMirror;
 
 User getUser(Login login) => login.user;
 void setUser(Login login, User user) => login.user = user;
