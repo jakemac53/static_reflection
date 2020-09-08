@@ -6,29 +6,19 @@ class _FromJson {
 
 const fromJson = _FromJson();
 
-final _constructorCache = <Type, ConstructorMirror>{};
-
 T jsonDecode<T>(Map<String, dynamic> json, ClassMirror<T> classMirror) =>
     _parseJson(json, classMirror, T);
 
 T _parseJson<T>(dynamic json, ClassMirror<T> classMirror, Type type) {
-  var result = _parseBuiltInType<T>(json);
+  if (json == null) return null as T;
+  var result = _parseBuiltInType<T>(json, classMirror);
   if (result != null) return result;
 
   if (json is! Map<String, dynamic>) {
     throw UnsupportedError('Unsupported type ${json.runtimeType}');
   }
 
-  var constructor = (_constructorCache[T] ??=
-          classMirror.declarations.values
-              .firstWhere(
-                  (declarationMirror) =>
-                      declarationMirror is MethodMirror &&
-                      declarationMirror.isConstructor,
-                  orElse: () =>
-                      throw 'Type `${classMirror.name}` has no constructor '
-                          'annotated with `fromJson`') as ConstructorMirror<T>)
-      as ConstructorMirror<T>;
+  var constructor = _constructorFor<T>(classMirror.reflectedType, classMirror);
 
   var positionalArguments = <Object?>[];
   var namedArguments = <String, Object?>{};
@@ -48,9 +38,33 @@ T _parseJson<T>(dynamic json, ClassMirror<T> classMirror, Type type) {
   return constructor.invoke(positionalArguments, namedArguments);
 }
 
-T? _parseBuiltInType<T>(Object? input) {
+T? _parseBuiltInType<T>(Object? input, ClassMirror<T> classMirror) {
   if (input is String || input is num) {
     return input as T;
   }
+  if (classMirror.reflectedType == List) {
+    var newList = _constructorFor<T>(classMirror.reflectedType, classMirror)
+        .invoke(const []) as List;
+    var inputList = input as List;
+    var typeParamMirror = classMirror.typeArguments.first as ClassMirror;
+    for (var item in inputList) {
+      newList.add(
+          _parseJson(item, typeParamMirror, typeParamMirror.reflectedType));
+    }
+    return newList as T;
+  }
   return null;
 }
+
+final _constructorCache = <Type, ConstructorMirror>{};
+
+ConstructorMirror<T> _constructorFor<T>(
+        Type type, ClassMirror<T> classMirror) =>
+    (_constructorCache[type] ??= classMirror.declarations.values.firstWhere(
+            (declarationMirror) =>
+                declarationMirror is MethodMirror &&
+                declarationMirror.isConstructor &&
+                declarationMirror.metadata.contains(fromJson),
+            orElse: () => throw 'Type `${classMirror.name}` has no constructor '
+                'annotated with `fromJson`') as ConstructorMirror)
+        as ConstructorMirror<T>;

@@ -12,17 +12,19 @@ name: $name
 age: $age''';
 }
 
-class Login {
+class Login<T> {
   User user;
   String password;
+  List<T> data;
 
   @fromJson
-  Login(this.user, this.password);
+  Login(this.user, this.password, this.data);
 
   toString() => '''
 user:
 ${user.toString().split('\n').map((s) => '  $s').join('\n')}
-password: $password''';
+password: $password
+data<$T>: $data''';
 }
 
 class Foo {
