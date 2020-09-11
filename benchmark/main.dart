@@ -76,9 +76,9 @@ Login<T, S> createLoginManual<T, S>(Map<String, dynamic> json,
         (json['data'] as List).map((i) => convertT(i)).toList());
 
 User<T> createUserManual<T>(
-        Map<String, dynamic> json, T Function(Object?) convertS) =>
+        Map<String, dynamic> json, T Function(Object?) convertT) =>
     User<T>(json['name'] as String,
-        age: json['age'] as int, extra: convertS(json['extra']));
+        age: json['age'] as int, extra: convertT(json['extra']));
 
 int convertInt(Object? o) => o as int;
 String convertString(Object? o) => o as String;
