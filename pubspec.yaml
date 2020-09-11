@@ -1,3 +1,7 @@
 name: static_reflection
 environment:
   sdk: '>=2.10.0-0.0 <2.11.0'
+dependencies:
+  jsontool: ^1.0.0
+dev_dependencies:
+  benchmark_harness: ^1.0.0
